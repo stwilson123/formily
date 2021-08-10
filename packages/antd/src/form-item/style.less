@@ -14,10 +14,6 @@
   &-label {
     line-height: @height-base;
     min-height: @height-base - 2;
-
-    * {
-      line-height: @height-base;
-    }
   }
 
   textarea.@{ant-prefix}-input {
@@ -58,15 +54,15 @@
     display: block;
   }
 
-  .@{ant-prefix}-checkbox-vertical + .@{ant-prefix}-checkbox-vertical,
-  .@{ant-prefix}-radio-vertical + .@{ant-prefix}-radio-vertical {
+  .@{ant-prefix}-checkbox-vertical+.@{ant-prefix}-checkbox-vertical,
+  .@{ant-prefix}-radio-vertical+.@{ant-prefix}-radio-vertical {
     margin-left: 0;
   }
 
   .@{ant-prefix}-input-number {
     width: 100%;
 
-    + .@{ant-prefix}-form-text {
+    +.@{ant-prefix}-form-text {
       margin-left: 8px;
     }
 
@@ -111,18 +107,18 @@
   }
 }
 
-.@{form-item-cls}-label label {
+.@{form-item-cls}-label {
   color: @heading-color;
 }
 
 .@{form-item-cls}-label-align-left {
-  > .@{form-item-cls}-label {
+  >.@{form-item-cls}-label {
     justify-content: flex-start;
   }
 }
 
 .@{form-item-cls}-label-align-right {
-  > .@{form-item-cls}-label {
+  >.@{form-item-cls}-label {
     justify-content: flex-end;
   }
 }
@@ -131,6 +127,7 @@
   .@{form-item-cls}-label {
     label {
       white-space: pre-line;
+      word-break: break-all;
     }
   }
 }
@@ -200,6 +197,7 @@
   .@{form-item-cls}-extra {
     min-height: 22px;
     line-height: 22px;
+    color: @text-color-secondary;
   }
 }
 
@@ -211,10 +209,6 @@
   .@{form-item-cls}-label {
     line-height: @height-sm;
     min-height: @height-sm - 2;
-
-    * {
-      line-height: @height-sm;
-    }
   }
 
   .@{form-item-cls}-control-content {
@@ -234,7 +228,7 @@
     min-height: @height-sm - 2;
   }
 
-  .@{form-item-cls}-label > label {
+  .@{form-item-cls}-label>label {
     height: @height-sm - 2;
   }
 
@@ -259,8 +253,7 @@
     }
   }
 
-  .@{ant-prefix}-select-single:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector {
+  .@{ant-prefix}-select-single:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector {
     padding: 0px 7px;
     height: @height-sm - 2;
     font-size: @font-size-sm;
@@ -287,8 +280,7 @@
     }
   }
 
-  .@{ant-prefix}-select-multiple:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector {
+  .@{ant-prefix}-select-multiple:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector {
     padding: 0px 2px;
     height: @height-sm - 2;
     font-size: @font-size-sm;
@@ -350,10 +342,6 @@
   .@{form-item-cls}-label {
     line-height: @height-lg;
     min-height: @height-lg - 2;
-
-    * {
-      line-height: @height-lg;
-    }
   }
 
   .@{form-item-cls}-control-content {
@@ -405,8 +393,7 @@
     }
   }
 
-  .@{ant-prefix}-select-single:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector {
+  .@{ant-prefix}-select-single:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector {
     padding: 0px 7px;
     height: @height-lg;
     font-size: @font-size-lg;
@@ -433,8 +420,7 @@
     }
   }
 
-  .@{ant-prefix}-select-multiple:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector {
+  .@{ant-prefix}-select-multiple:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector {
     padding: 0px 2px;
     height: @height-lg - 2;
     font-size: @font-size-lg;
@@ -494,11 +480,6 @@
     .@{form-item-cls}-label {
       min-height: @height-base - 10;
       line-height: 1.5715;
-
-      * {
-        min-height: @height-base - 10;
-        line-height: 1.5715;
-      }
     }
   }
 }
@@ -512,7 +493,7 @@
   color: #00000073;
   display: flex;
   align-items: center;
-  height: @height-base;
+  max-height: @height-base;
 
   span {
     display: inline-flex;
@@ -534,6 +515,7 @@
 .@{form-item-cls}-control-wrap {
   .@{form-item-cls}-control {
     white-space: pre-line;
+    word-break: break-all;
   }
 }
 
@@ -559,10 +541,10 @@
 }
 
 .@{form-item-cls}-fullness {
-  > .@{form-item-cls}-control {
-    > .@{form-item-cls}-control-content {
-      > .@{form-item-cls}-control-content-component {
-        > *:first-child {
+  >.@{form-item-cls}-control {
+    >.@{form-item-cls}-control-content {
+      >.@{form-item-cls}-control-content-component {
+        >*:first-child {
           width: 100%;
         }
       }
@@ -581,8 +563,7 @@
   .@{ant-prefix}-input-number,
   .@{ant-prefix}-picker,
   .@{ant-prefix}-cascader-picker:focus .@{ant-prefix}-cascader-input,
-  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector,
+  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input {
     border: none !important;
@@ -591,12 +572,12 @@
 }
 
 .@{form-item-cls}-bordered-none {
+
   .@{ant-prefix}-input-number,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-picker,
   .@{ant-prefix}-cascader-picker:focus .@{ant-prefix}-cascader-input,
-  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector,
+  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector,
   .@{ant-prefix}-input {
     border: none !important;
     box-shadow: none !important;
@@ -620,8 +601,7 @@
   .@{ant-prefix}-input-number,
   .@{ant-prefix}-picker,
   .@{ant-prefix}-cascader-picker:focus .@{ant-prefix}-cascader-input,
-  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector,
+  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input {
     border: none !important;
@@ -653,8 +633,7 @@
   .@{ant-prefix}-input-number,
   .@{ant-prefix}-picker,
   .@{ant-prefix}-cascader-picker:focus .@{ant-prefix}-cascader-input,
-  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input)
-    .@{ant-prefix}-select-selector,
+  .@{ant-prefix}-select:not(.@{ant-prefix}-select-customize-input) .@{ant-prefix}-select-selector,
   .@{ant-prefix}-input {
     .active();
   }
@@ -669,6 +648,7 @@
 }
 
 .@{form-item-cls}-error {
+
   .@{ant-prefix}-select-selector,
   .@{ant-prefix}-cascader-picker,
   .@{ant-prefix}-picker,
@@ -677,7 +657,7 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input {
-    border-color: @error-color !important;
+    border-color: @error-color  !important;
   }
 
   .@{ant-prefix}-select-selector,
@@ -688,13 +668,13 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper:hover,
   .@{ant-prefix}-input:hover {
-    border-color: @error-color !important;
+    border-color: @error-color  !important;
   }
 
   .@{ant-prefix}-select:not(.@{ant-prefix}-select-disabled):not(.@{ant-prefix}-select-customize-input) {
     .@{ant-prefix}-select-selector {
       background-color: @form-error-input-bg;
-      border-color: @error-color !important;
+      border-color: @error-color  !important;
     }
 
     &.@{ant-prefix}-select-open .@{ant-prefix}-select-selector,
@@ -733,18 +713,19 @@
 }
 
 .@{form-item-cls}-error-help {
-  color: @error-color;
+  color: @error-color !important;
 }
 
 .@{form-item-cls}-warning-help {
-  color: @warning-color;
+  color: @warning-color !important;
 }
 
 .@{form-item-cls}-success-help {
-  color: @success-color;
+  color: @success-color !important;
 }
 
 .@{form-item-cls}-warning {
+
   .@{ant-prefix}-select-selector,
   .@{ant-prefix}-cascader-picker,
   .@{ant-prefix}-picker,
@@ -753,7 +734,7 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input {
-    border-color: @warning-color !important;
+    border-color: @warning-color  !important;
   }
 
   .@{ant-prefix}-select-selector,
@@ -764,13 +745,13 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper:hover,
   .@{ant-prefix}-input:hover {
-    border-color: @warning-color !important;
+    border-color: @warning-color  !important;
   }
 
   .@{ant-prefix}-select:not(.@{ant-prefix}-select-disabled):not(.@{ant-prefix}-select-customize-input) {
     .@{ant-prefix}-select-selector {
       background-color: @form-warning-input-bg;
-      border-color: @warning-color !important;
+      border-color: @warning-color  !important;
     }
 
     &.@{ant-prefix}-select-open .@{ant-prefix}-select-selector,
@@ -809,6 +790,7 @@
 }
 
 .@{form-item-cls}-success {
+
   .@{ant-prefix}-select-selector,
   .@{ant-prefix}-cascader-picker,
   .@{ant-prefix}-picker,
@@ -817,7 +799,7 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input {
-    border-color: @success-color !important;
+    border-color: @success-color  !important;
   }
 
   .@{ant-prefix}-select-selector,
@@ -828,14 +810,14 @@
   .@{ant-prefix}-input-affix-wrapper,
   .@{ant-prefix}-input-affix-wrapper:hover,
   .@{ant-prefix}-input:hover {
-    border-color: @success-color !important;
+    border-color: @success-color  !important;
   }
 
   .@{ant-prefix}-input-affix-wrapper-focused,
   .@{ant-prefix}-input-affix-wrapper:focus,
   .@{ant-prefix}-input-focused,
   .@{ant-prefix}-input:focus {
-    border-color: @success-color !important;
+    border-color: @success-color  !important;
     border-right-width: 1px !important;
     outline: 0;
   }

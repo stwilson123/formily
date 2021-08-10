@@ -35,7 +35,7 @@ export default {
     playground: path.resolve(__dirname, './main'),
   },
   output: {
-    path: path.resolve(__dirname, '../public'),
+    path: path.resolve(__dirname, '../build'),
     filename: '[name].[hash].bundle.js',
   },
   resolve: {
@@ -81,7 +81,7 @@ export default {
             loader: 'less-loader',
             options: {
               // modifyVars: getThemeVariables({
-              //   dark: true // 开启暗黑模式
+              //   dark: true, // 开启暗黑模式
               // }),
               javascriptEnabled: true,
             },

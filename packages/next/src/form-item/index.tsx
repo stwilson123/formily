@@ -89,10 +89,9 @@ function useOverflow<
 
   useLayoutEffect(() => {
     if (containerRef.current && contentRef.current) {
-      if (
-        contentRef.current.getBoundingClientRect().width >
-        containerRef.current.getBoundingClientRect().width
-      ) {
+      const contentWidth = contentRef.current.getBoundingClientRect().width
+      const containerWidth = containerRef.current.getBoundingClientRect().width
+      if (contentWidth && containerWidth && containerWidth < contentWidth) {
         if (!overflow) setOverflow(true)
       } else {
         if (overflow) setOverflow(false)
@@ -118,8 +117,10 @@ export const BaseItem: React.FC<IFormItemProps> = (props) => {
   const [active, setActice] = useState(false)
   const gridSpan = useGridSpan(props.gridSpan)
   const formLayout = useFormItemLayout(others)
-  const { containerRef, contentRef, overflow } =
-    useOverflow<HTMLDivElement, HTMLLabelElement>()
+  const { containerRef, contentRef, overflow } = useOverflow<
+    HTMLDivElement,
+    HTMLLabelElement
+  >()
   const {
     label,
     style,
@@ -326,7 +327,7 @@ export const BaseItem: React.FC<IFormItemProps> = (props) => {
               [`${prefix}-focus`]: active,
             })}
           >
-            <FormLayoutShallowContext.Provider value={undefined}>
+            <FormLayoutShallowContext.Provider value={{ size }}>
               {formatChildren}
             </FormLayoutShallowContext.Provider>
             {feedbackIcon && (
@@ -417,6 +418,10 @@ export const FormItem: ComposeFormItem = connect(
     }
   )
 )
+
+FormItem.defaultProps = {
+  fullness: true,
+}
 
 FormItem.BaseItem = BaseItem
 

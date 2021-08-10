@@ -10,8 +10,8 @@
   line-height: $form-element-medium-height;
   font-size: $form-element-medium-font-size;
 
-  &-label * {
-    line-height: $form-element-medium-height;
+  &-layout-vertical {
+    display: block;
   }
 
   &-label-content {
@@ -20,18 +20,11 @@
 
   &-control-content-component {
     line-height: $form-element-medium-height;
-
-    & > .#{$css-prefix}input,
-    .#{$css-prefix}select,
-    .#{$css-prefix}date-picker,
-    .#{$css-prefix}number-picker {
-      width: 100% !important;
-    }
   }
 
   &-inset {
     padding: 0 8px;
-    border-radius: $form-element-large-corner;
+    border-radius: $form-element-medium-corner;
     width: 100%;
 
     .#{$css-prefix}input {
@@ -101,6 +94,7 @@
   .#{$form-item-cls}-label {
     label {
       white-space: pre-line;
+      word-break: break-all;
     }
   }
 }
@@ -132,6 +126,7 @@
 .#{$form-item-cls}-control {
   flex: 1;
   max-width: 100%;
+
   .#{$form-item-cls}-control-content {
     display: flex;
 
@@ -151,6 +146,20 @@
           border: none !important;
           box-shadow: none !important;
           outline: none;
+
+          .#{$css-prefix}input-control {
+            margin-right: 0;
+            padding-right: 0;
+            .#{$css-prefix}icon {
+              display: none;
+            }
+
+            .#{$css-prefix}input-hint-wrap {
+              .#{$css-prefix}icon {
+                display: block;
+              }
+            }
+          }
         }
       }
     }
@@ -175,10 +184,7 @@
 
 .#{$form-item-cls}-size-small {
   font-size: $form-element-small-font-size;
-
-  .#{$form-item-cls}-label * {
-    line-height: $form-element-small-height;
-  }
+  line-height: $form-element-small-height;
 
   .#{$form-item-cls}-label-content {
     min-height: $form-element-small-height;
@@ -189,6 +195,18 @@
       line-height: $form-element-small-height;
       min-height: $form-element-small-height;
     }
+
+    .#{$form-item-cls}-addon-before {
+      min-height: $form-element-small-height;
+    }
+
+    .#{$form-item-cls}-addon-after {
+      min-height: $form-element-small-height;
+    }
+  }
+
+  &-inset {
+    border-radius: $form-element-small-corner;
   }
 
   &.#{$form-item-cls}-feedback-layout-terse {
@@ -223,10 +241,7 @@
 
 .#{$form-item-cls}-size-large {
   font-size: $form-element-large-font-size;
-
-  .#{$form-item-cls}-label * {
-    line-height: $form-element-large-height;
-  }
+  line-height: $form-element-large-height;
 
   .#{$form-item-cls}-label-content {
     min-height: $form-element-large-height;
@@ -237,15 +252,23 @@
       line-height: $form-element-large-height;
       min-height: $form-element-large-height;
     }
+
+    .#{$form-item-cls}-addon-before {
+      min-height: $form-element-large-height;
+    }
+
+    .#{$form-item-cls}-addon-after {
+      min-height: $form-element-large-height;
+    }
+  }
+
+  &-inset {
+    border-radius: $form-element-large-corner;
   }
 
   .#{$form-item-cls}-help,
   .#{$form-item-cls}-extra {
     min-height: $form-element-large-font-size + 2;
-  }
-
-  .#{$form-item-cls}-control-content {
-    min-height: $form-element-large-height;
   }
 
   &.#{$form-item-cls}-feedback-layout-loose {
@@ -265,20 +288,6 @@
   }
 }
 
-.#{$form-item-cls} {
-  &-layout-vertical {
-    display: block;
-
-    .#{$form-item-cls}-label * {
-      line-height: $form-element-medium-height - 10 !important;
-    }
-
-    .#{$form-item-cls}-label-content {
-      min-height: $form-element-medium-height - 10 !important;
-    }
-  }
-}
-
 .#{$form-item-cls}-feedback-layout-popover {
   margin-bottom: 8px;
 }
@@ -286,8 +295,8 @@
 .#{$form-item-cls}-label-tooltip-icon {
   margin-left: 4px;
   color: #00000073;
-  height: $form-element-medium-height;
   cursor: pointer;
+  max-height: $form-element-medium-height;
 }
 
 .#{$form-item-cls}-control-align-left {
@@ -334,7 +343,7 @@
   > .#{$form-item-cls}-control {
     > .#{$form-item-cls}-control-content {
       > .#{$form-item-cls}-control-content-component {
-        > *:first-child {
+        > *:first-child:not(.#{$css-prefix}switch) {
           width: 100%;
         }
       }

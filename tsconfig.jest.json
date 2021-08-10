@@ -4,12 +4,11 @@
     "jsx": "react",
     "paths": {
       "@formily/*": [
-        "./packages/*/src"
+        "./packages/*/src",
+        "./designable/*/src",
+        "./devtools/*/src"
       ]
     }
   },
-  "exclude": [
-    "./packages/*/esm",
-    "./packages/*/lib"
-  ]
+  "exclude": ["./packages/*/esm", "./packages/*/lib"]
 }

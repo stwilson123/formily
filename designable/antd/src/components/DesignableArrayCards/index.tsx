@@ -144,7 +144,7 @@ export const DesignableArrayCards: React.FC<CardProps> = observer((props) => {
       <LoadTemplate
         actions={[
           {
-            title: 'addIndex',
+            title: 'Common.addIndex',
             onClick: () => {
               if (
                 hasNodeByComponentPath(node, [
@@ -161,12 +161,12 @@ export const DesignableArrayCards: React.FC<CardProps> = observer((props) => {
                   'x-component': 'ArrayCards.Index',
                 },
               })
-              ensureVoidItemsNode(node).appendNode(indexNode)
+              ensureVoidItemsNode(node).append(indexNode)
             },
           },
 
           {
-            title: 'addOperation',
+            title: 'Common.addOperation',
             onClick: () => {
               const oldAdditionNode = findNodeByComponentPath(node, [
                 'ArrayCards',
@@ -199,7 +199,7 @@ export const DesignableArrayCards: React.FC<CardProps> = observer((props) => {
                 'ArrayCards.MoveUp',
               ])
               if (!oldRemoveNode) {
-                ensureVoidItemsNode(node).appendNode(
+                ensureVoidItemsNode(node).append(
                   new TreeNode({
                     componentName: 'DesignableField',
                     props: {
@@ -210,7 +210,7 @@ export const DesignableArrayCards: React.FC<CardProps> = observer((props) => {
                 )
               }
               if (!oldMoveDownNode) {
-                ensureVoidItemsNode(node).appendNode(
+                ensureVoidItemsNode(node).append(
                   new TreeNode({
                     componentName: 'DesignableField',
                     props: {
@@ -221,7 +221,7 @@ export const DesignableArrayCards: React.FC<CardProps> = observer((props) => {
                 )
               }
               if (!oldMoveUpNode) {
-                ensureVoidItemsNode(node).appendNode(
+                ensureVoidItemsNode(node).append(
                   new TreeNode({
                     componentName: 'DesignableField',
                     props: {

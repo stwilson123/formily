@@ -1,5 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react'
 import { Badge, Card, Collapse } from '@alifd/next'
+import { ArrayField } from '@formily/core'
 import {
   RecursionField,
   useField,
@@ -71,7 +72,7 @@ const insertExpandedKeys = (expandedKeys: number[], index: number) => {
 
 export const ArrayCollapse: ComposedArrayCollapse = observer(
   ({ defaultOpenPanelCount, ...props }: IArrayCollapseProps) => {
-    const field = useField<Formily.Core.Models.ArrayField>()
+    const field = useField<ArrayField>()
     const dataSource = Array.isArray(field.value) ? field.value : []
 
     const [expandKeys, setExpandKeys] = useState<number[]>(
@@ -89,9 +90,9 @@ export const ArrayCollapse: ComposedArrayCollapse = observer(
     if (!schema) throw new Error('can not found schema object')
 
     const renderAddition = () => {
-      return schema.reduceProperties((addition, schema) => {
+      return schema.reduceProperties((addition, schema, key) => {
         if (isAdditionComponent(schema)) {
-          return <RecursionField schema={schema} name="addition" />
+          return <RecursionField schema={schema} name={key} />
         }
         return addition
       }, null)

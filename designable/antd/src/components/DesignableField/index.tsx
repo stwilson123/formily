@@ -11,18 +11,25 @@ import {
   Schema,
   ISchema,
 } from '@formily/react'
+import {
+  DataSourceSetter,
+  ReactionsSetter,
+  ValidatorSetter,
+} from '@formily/designable-setters'
 import { FormTab } from '@formily/antd'
 import { clone } from '@formily/shared'
 import { FormItemSwitcher } from '../FormItemSwitcher'
 import { DesignableObject } from '../DesignableObject'
 import { createOptions } from './options'
-import { IDesignableFieldProps } from './types'
+import { IDesignableFieldFactoryProps } from './types'
 import { includesComponent } from '../../shared'
 import * as defaultSchemas from '../../schemas'
 
 Schema.silent()
 
-export const createDesignableField = (options: IDesignableFieldProps) => {
+export const createDesignableField = (
+  options: IDesignableFieldFactoryProps
+) => {
   const realOptions = createOptions(options)
 
   const tabs = {}
@@ -87,6 +94,9 @@ export const createDesignableField = (options: IDesignableFieldProps) => {
           type: 'string',
           'x-decorator': 'FormItem',
           'x-component': 'Input',
+          'x-component-props': {
+            defaultValue: node.id,
+          },
           'x-index': 0,
         },
         title: {
@@ -134,7 +144,7 @@ export const createDesignableField = (options: IDesignableFieldProps) => {
           'x-reactions': {
             'x-decorator': 'FormItem',
             'x-index': 5,
-            // 'x-component': 'ReactionsSetter',
+            'x-component': ReactionsSetter,
           },
         })
       }
@@ -164,8 +174,8 @@ export const createDesignableField = (options: IDesignableFieldProps) => {
         Object.assign(base.properties, {
           'x-reactions': {
             'x-decorator': 'FormItem',
-            'x-index': 8,
-            // 'x-component': 'ReactionsSetter',
+            'x-index': 7,
+            'x-component': ReactionsSetter,
           },
         })
       }
@@ -177,13 +187,13 @@ export const createDesignableField = (options: IDesignableFieldProps) => {
         },
         enum: {
           'x-decorator': 'FormItem',
-          //  'x-component': 'DataSourceSetter',
+          'x-component': DataSourceSetter,
           'x-index': 6,
         },
         'x-validator': {
-          'x-decorator': 'FormItem',
-          // 'x-component': 'ValidatorSetter',
-          'x-index': 7,
+          type: 'array',
+          'x-component': ValidatorSetter,
+          'x-index': 8,
         },
         required: {
           type: 'boolean',
@@ -193,6 +203,8 @@ export const createDesignableField = (options: IDesignableFieldProps) => {
         },
       })
     }
+
+    base['$namespace'] = `namespace.${component}`
 
     return base
   }

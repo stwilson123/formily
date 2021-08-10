@@ -1,25 +1,27 @@
 # action
 
-## 描述
+## Description
 
-内部用[batch](/api/batch)包装一个函数，使得函数变成一个批量操作模式，解决多个原子操作 reaction 触发多次的问题，同时 action 还能在 define 中以 annotation 的方式标注某个方法是 batch 模式。
+Define a batch action. The only difference with batch is that dependencies cannot be collected inside an action
 
-## 签名
+## Signature
 
 ```ts
-interface action<T extends (...args: any[]) => any> {
-  (callback?: T): T
+interface action {
+  <T>(callback?: () => T): T //In-situ action
+  scope<T>(callback?: () => T): T //In-situ local action
+  bound<T extends (...args: any[]) => any>(callback: T, context?: any): T //High-level binding
 }
 ```
 
-## 用例
+## Example
 
 ```ts
 import { observable, action } from '@formily/reactive'
 
 const obs = observable({})
 
-const method = action(() => {
+const method = action.bound(() => {
   obs.aa = 123
   obs.bb = 321
 })

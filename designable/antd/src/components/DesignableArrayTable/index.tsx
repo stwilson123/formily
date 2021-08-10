@@ -217,7 +217,7 @@ export const DesignableArrayTable: React.FC<TableProps<any>> = observer(
         <LoadTemplate
           actions={[
             {
-              title: 'addTableSortHandle',
+              title: 'Common.addTableSortHandle',
               onClick: () => {
                 if (
                   hasNodeByComponentPath(node, [
@@ -247,11 +247,11 @@ export const DesignableArrayTable: React.FC<TableProps<any>> = observer(
                     },
                   ],
                 })
-                ensureObjectItemsNode(node).prependNode(tableColumn)
+                ensureObjectItemsNode(node).prepend(tableColumn)
               },
             },
             {
-              title: 'addIndex',
+              title: 'Common.addIndex',
               onClick: () => {
                 if (
                   hasNodeByComponentPath(node, [
@@ -290,12 +290,12 @@ export const DesignableArrayTable: React.FC<TableProps<any>> = observer(
                 if (sortNode) {
                   sortNode.parent.insertAfter(tableColumn)
                 } else {
-                  ensureObjectItemsNode(node).prependNode(tableColumn)
+                  ensureObjectItemsNode(node).prepend(tableColumn)
                 }
               },
             },
             {
-              title: 'addTableColumn',
+              title: 'Common.addTableColumn',
               onClick: () => {
                 const operationNode = findNodeByComponentPath(node, [
                   'ArrayTable',
@@ -322,12 +322,12 @@ export const DesignableArrayTable: React.FC<TableProps<any>> = observer(
                 if (operationNode) {
                   operationNode.parent.insertBefore(tableColumn)
                 } else {
-                  ensureObjectItemsNode(node).appendNode(tableColumn)
+                  ensureObjectItemsNode(node).append(tableColumn)
                 }
               },
             },
             {
-              title: 'addOperation',
+              title: 'Common.addOperation',
               onClick: () => {
                 const oldOperationNode = findNodeByComponentPath(node, [
                   'ArrayTable',
@@ -379,7 +379,7 @@ export const DesignableArrayTable: React.FC<TableProps<any>> = observer(
                       },
                     ],
                   })
-                  ensureObjectItemsNode(node).appendNode(operationNode)
+                  ensureObjectItemsNode(node).append(operationNode)
                 }
                 if (!oldAdditionNode) {
                   const additionNode = new TreeNode({

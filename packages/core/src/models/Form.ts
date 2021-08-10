@@ -2,10 +2,10 @@ import {
   define,
   observable,
   batch,
+  action,
   toJS,
   isObservable,
   observe,
-  untracked,
 } from '@formily/reactive'
 import {
   FormPath,
@@ -14,9 +14,11 @@ import {
   isValid,
   uid,
   globalThisPolyfill,
-  defaults,
+  merge,
   clone,
   isPlainObj,
+  isArr,
+  isObj,
 } from '@formily/shared'
 import { Heart } from './Heart'
 import { Field } from './Field'
@@ -150,19 +152,22 @@ export class Form<ValueType extends object = any> {
       readOnly: observable.computed,
       readPretty: observable.computed,
       disabled: observable.computed,
-      setValues: batch,
-      setValuesIn: batch,
-      setInitialValues: batch,
-      setInitialValuesIn: batch,
-      setPattern: batch,
-      setDisplay: batch,
-      setState: batch,
-      deleteIntialValuesIn: batch,
-      deleteValuesIn: batch,
-      setSubmitting: batch,
-      setValidating: batch,
-      setFormGraph: batch,
-      clearFormGraph: batch,
+      setValues: action,
+      setValuesIn: action,
+      setInitialValues: action,
+      setInitialValuesIn: action,
+      setPattern: action,
+      setDisplay: action,
+      setState: action,
+      deleteInitialValuesIn: action,
+      deleteValuesIn: action,
+      setSubmitting: action,
+      setValidating: action,
+      setFormGraph: action,
+      clearFormGraph: action,
+      reset: action,
+      submit: action,
+      validate: action,
       onMount: batch,
       onUnmount: batch,
       onInit: batch,
@@ -329,7 +334,10 @@ export class Form<ValueType extends object = any> {
       batch(() => {
         this.fields[identifier] = new ArrayField(
           address,
-          props,
+          {
+            ...props,
+            value: isArr(props.value) ? props.value : [],
+          },
           this,
           this.props.designable
         )
@@ -352,7 +360,10 @@ export class Form<ValueType extends object = any> {
       batch(() => {
         this.fields[identifier] = new ObjectField(
           address,
-          props,
+          {
+            ...props,
+            value: isObj(props.value) ? props.value : {},
+          },
           this,
           this.props.designable
         )
@@ -389,15 +400,15 @@ export class Form<ValueType extends object = any> {
 
   setValues = (values: any, strategy: IFormMergeStrategy = 'merge') => {
     if (!isPlainObj(values)) return
-    untracked(() => {
-      if (strategy === 'merge' || strategy === 'deepMerge') {
-        this.values = defaults(this.values, values)
-      } else if (strategy === 'shallowMerge') {
-        this.values = Object.assign(this.values, values)
-      } else {
-        this.values = values as any
-      }
-    })
+    if (strategy === 'merge' || strategy === 'deepMerge') {
+      this.values = merge(this.values, values, {
+        arrayMerge: (target, source) => source,
+      })
+    } else if (strategy === 'shallowMerge') {
+      this.values = Object.assign(this.values, values)
+    } else {
+      this.values = values as any
+    }
   }
 
   setInitialValues = (
@@ -405,27 +416,23 @@ export class Form<ValueType extends object = any> {
     strategy: IFormMergeStrategy = 'merge'
   ) => {
     if (!isPlainObj(initialValues)) return
-    untracked(() => {
-      if (strategy === 'merge' || strategy === 'deepMerge') {
-        this.initialValues = defaults(this.initialValues, initialValues)
-      } else if (strategy === 'shallowMerge') {
-        this.initialValues = Object.assign(this.initialValues, initialValues)
-      } else {
-        this.initialValues = initialValues as any
-      }
-    })
+    if (strategy === 'merge' || strategy === 'deepMerge') {
+      this.initialValues = merge(this.initialValues, initialValues, {
+        arrayMerge: (target, source) => source,
+      })
+    } else if (strategy === 'shallowMerge') {
+      this.initialValues = Object.assign(this.initialValues, initialValues)
+    } else {
+      this.initialValues = initialValues as any
+    }
   }
 
   setValuesIn = (pattern: FormPathPattern, value: any) => {
-    untracked(() => {
-      FormPath.setIn(this.values, pattern, value)
-    })
+    FormPath.setIn(this.values, pattern, value)
   }
 
   deleteValuesIn = (pattern: FormPathPattern) => {
-    untracked(() => {
-      FormPath.deleteIn(this.values, pattern)
-    })
+    FormPath.deleteIn(this.values, pattern)
   }
 
   existValuesIn = (pattern: FormPathPattern) => {
@@ -437,15 +444,11 @@ export class Form<ValueType extends object = any> {
   }
 
   setInitialValuesIn = (pattern: FormPathPattern, initialValue: any) => {
-    untracked(() => {
-      FormPath.setIn(this.initialValues, pattern, initialValue)
-    })
+    FormPath.setIn(this.initialValues, pattern, initialValue)
   }
 
-  deleteIntialValuesIn = (pattern: FormPathPattern) => {
-    untracked(() => {
-      FormPath.deleteIn(this.initialValues, pattern)
-    })
+  deleteInitialValuesIn = (pattern: FormPathPattern) => {
+    FormPath.deleteIn(this.initialValues, pattern)
   }
 
   existInitialValuesIn = (pattern: FormPathPattern) => {
@@ -603,10 +606,9 @@ export class Form<ValueType extends object = any> {
 
   onUnmount = () => {
     this.notify(LifeCycleTypes.ON_FORM_UNMOUNT)
-    this.query('*').forEach((field) => field.dispose())
+    this.query('*').forEach((field) => field.destroy())
     this.disposers.forEach((dispose) => dispose())
     this.unmounted = true
-    this.fields = {}
     this.indexes.clear()
     this.heart.clear()
     if (globalThisPolyfill[DEV_TOOLS_HOOK] && !this.props.designable) {
@@ -634,8 +636,10 @@ export class Form<ValueType extends object = any> {
     this.graph.setGraph(graph)
   }
 
-  clearFormGraph = () => {
-    this.fields = {}
+  clearFormGraph = (pattern: FormPathPattern = '*') => {
+    this.query(pattern).forEach((field) => {
+      field.destroy()
+    })
   }
 
   validate = async (pattern: FormPathPattern = '*') => {

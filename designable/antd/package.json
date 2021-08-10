@@ -1,6 +1,6 @@
 {
   "name": "@formily/designable-antd",
-  "version": "2.0.0-beta.76",
+  "version": "2.0.0-beta.88",
   "private": true,
   "license": "MIT",
   "main": "lib",
@@ -23,14 +23,14 @@
   },
   "scripts": {
     "build": "rimraf -rf lib esm dist && npm run build:cjs && npm run build:esm && npm run build:umd && ts-node copy",
-    "build:cjs": "tsc --declaration",
-    "build:esm": "tsc --declaration --module es2015 --outDir esm",
+    "build:cjs": "tsc --project tsconfig.build.json",
+    "build:esm": "tsc --project tsconfig.build.json --module es2015 --outDir esm",
     "build:umd": "rollup --config",
     "build:playground": "webpack-cli --config playground/webpack.prod.ts",
     "start": "webpack-dev-server --config playground/webpack.dev.ts"
   },
   "devDependencies": {
-    "@designable/react-settings-form": "^0.3.24",
+    "@designable/react-settings-form": "^0.4.34",
     "autoprefixer": "^9.0",
     "file-loader": "^5.0.2",
     "fs-extra": "^8.1.0",
@@ -56,13 +56,14 @@
     "react-is": ">=16.8.0 || >=17.0.0"
   },
   "dependencies": {
-    "@designable/core": "^0.3.24",
-    "@designable/formily": "^0.3.24",
-    "@designable/react": "^0.3.24",
-    "@formily/antd": "2.0.0-beta.76",
-    "@formily/core": "2.0.0-beta.76",
-    "@formily/react": "2.0.0-beta.76",
-    "@formily/shared": "2.0.0-beta.76"
+    "@designable/core": "^0.4.34",
+    "@designable/formily": "^0.4.34",
+    "@designable/react": "^0.4.34",
+    "@formily/antd": "2.0.0-beta.88",
+    "@formily/core": "2.0.0-beta.88",
+    "@formily/designable-setters": "2.0.0-beta.88",
+    "@formily/react": "2.0.0-beta.88",
+    "@formily/shared": "2.0.0-beta.88"
   },
   "publishConfig": {
     "access": "public"

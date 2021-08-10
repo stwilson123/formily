@@ -20,6 +20,7 @@ import {
   batch,
   toJS,
   autorun,
+  action,
 } from '@formily/reactive'
 import { Form } from './Form'
 import {
@@ -94,9 +95,9 @@ export class Field<
   form: Form
   props: IFieldProps<Decorator, Component, TextType, ValueType>
 
-  private caches: IFieldCaches = {}
-  private requests: IFieldRequests = {}
-  private disposers: (() => void)[] = []
+  protected caches: IFieldCaches = {}
+  protected requests: IFieldRequests = {}
+  protected disposers: (() => void)[] = []
 
   constructor(
     address: FormPathPattern,
@@ -192,32 +193,33 @@ export class Field<
       readOnly: observable.computed,
       readPretty: observable.computed,
       editable: observable.computed,
-      setDisplay: batch,
-      setTitle: batch,
-      setDescription: batch,
-      setDataSource: batch,
-      setValue: batch,
-      setPattern: batch,
-      setInitialValue: batch,
-      setLoading: batch,
-      setValidating: batch,
-      setFeedback: batch,
-      setErrors: batch,
-      setWarnings: batch,
-      setSuccesses: batch,
-      setValidator: batch,
-      setRequired: batch,
-      setComponent: batch,
-      setComponentProps: batch,
-      setDecorator: batch,
-      setDecoratorProps: batch,
-      setState: batch,
+      setDisplay: action,
+      setTitle: action,
+      setDescription: action,
+      setDataSource: action,
+      setValue: action,
+      setPattern: action,
+      setInitialValue: action,
+      setLoading: action,
+      setValidating: action,
+      setFeedback: action,
+      setErrors: action,
+      setWarnings: action,
+      setSuccesses: action,
+      setValidator: action,
+      setRequired: action,
+      setComponent: action,
+      setComponentProps: action,
+      setDecorator: action,
+      setDecoratorProps: action,
+      validate: action,
+      reset: action,
+      onInit: batch,
       onInput: batch,
       onMount: batch,
       onUnmount: batch,
       onFocus: batch,
       onBlur: batch,
-      reset: batch,
     })
   }
 
@@ -800,6 +802,11 @@ export class Field<
       dispose()
     })
     this.form.removeEffects(this)
+  }
+
+  destroy = () => {
+    this.dispose()
+    delete this.form.fields[this.address.toString()]
   }
 
   match = (pattern: FormPathPattern) => {

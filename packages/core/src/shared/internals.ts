@@ -10,10 +10,12 @@ import {
   isPlainObj,
   toArr,
   isNumberLike,
+  shallowClone,
+  isEqual,
 } from '@formily/shared'
 import { ValidatorTriggerType, validate } from '@formily/validator'
-import { action, batch, toJS } from '@formily/reactive'
-import { Field, ArrayField, Form } from '../models'
+import { batch, toJS, DataChange } from '@formily/reactive'
+import { Field, ArrayField, Form, ObjectField } from '../models'
 import {
   ISpliceArrayStateProps,
   IExchangeArrayStateProps,
@@ -27,7 +29,6 @@ import {
 } from '../types'
 import { isArrayField, isGeneralField, isQuery, isVoidField } from './externals'
 import { ReservedProperties, GlobalState } from './constants'
-import { isObjectField } from './checkers'
 
 export const isHTMLInputEvent = (event: any, stopPropagation = true) => {
   if (event?.target) {
@@ -105,6 +106,7 @@ export const applyFieldPatches = (
 ) => {
   patches.forEach(({ type, address, payload }) => {
     if (type === 'remove') {
+      target[address].dispose()
       delete target[address]
     } else if (type === 'update') {
       if (payload) {
@@ -355,40 +357,112 @@ export const exchangeArrayState = (
   field.form.notify(LifeCycleTypes.ON_FORM_GRAPH_CHANGE)
 }
 
-export const isEmptyWithField = (field: GeneralField, value: any) => {
-  if (isArrayField(field) || isObjectField(field)) {
-    return isEmpty(value, true)
+export const cleanupArrayChildren = (field: ArrayField, start: number) => {
+  const address = field.address.toString()
+  const fields = field.form.fields
+
+  const isArrayChildren = (identifier: string) => {
+    return (
+      identifier.indexOf(address) === 0 && identifier.length > address.length
+    )
   }
-  return !isValid(value)
+
+  const isNeedCleanup = (identifier: string) => {
+    const afterStr = identifier.slice(address.length)
+    const number = afterStr.match(/^\.(\d+)/)?.[1]
+    if (number === undefined) return false
+    const index = Number(number)
+    return index >= start
+  }
+
+  batch(() => {
+    each(fields, (field, identifier) => {
+      if (isArrayChildren(identifier) && isNeedCleanup(identifier)) {
+        field.destroy()
+      }
+    })
+  })
+}
+
+export const cleanupObjectChildren = (field: ObjectField, keys: string[]) => {
+  if (keys.length === 0) return
+  const address = field.address.toString()
+  const fields = field.form.fields
+
+  const isObjectChildren = (identifier: string) => {
+    return (
+      identifier.indexOf(address) === 0 && identifier.length > address.length
+    )
+  }
+
+  const isNeedCleanup = (identifier: string) => {
+    const afterStr = identifier.slice(address.length)
+    const key = afterStr.match(/^\.([^.]+)/)?.[1]
+    if (key === undefined) return false
+    return keys.includes(key)
+  }
+
+  batch(() => {
+    each(fields, (field, identifier) => {
+      if (isObjectChildren(identifier) && isNeedCleanup(identifier)) {
+        field.destroy()
+      }
+    })
+  })
 }
 
 export const initFieldValue = (field: Field, designable: boolean) => {
   GlobalState.initializing = true
-  if (isEmptyWithField(field, field.initialValue)) {
-    if (isValid(field.props.initialValue)) {
-      field.initialValue = field.props.initialValue
-    }
-  }
-  if (isEmptyWithField(field, field.value)) {
-    const isEmptyValue = isEmptyWithField(field, field.props.value)
-    const isEmptyInitialValue = isEmptyWithField(
-      field,
-      field.props.initialValue
-    )
-    if (isEmptyValue && !isEmptyInitialValue) {
-      field.value = field.props.initialValue
-    } else if (isValid(field.props.value)) {
-      field.value = field.props.value
-    } else if (isValid(field.props.initialValue)) {
-      field.value = field.props.initialValue
-    }
-  }
   if (designable) {
     if (isValid(field.props.initialValue)) {
-      field.initialValue = field.props.initialValue
+      field.initialValue = shallowClone(field.props.initialValue)
     }
     if (isValid(field.props.value)) {
       field.value = field.props.value
+    }
+  } else {
+    const fromValue = (value: any) => [
+      isValid(value),
+      isEmpty(value, true),
+      value,
+    ]
+    const [, isEmptySelfValue, selfValue] = fromValue(field.value)
+    const [, isEmptySelfInitialValue, selfInitialValue] = fromValue(
+      field.initialValue
+    )
+    const [isValidPropsValue, isEmptyPropsValue, propsValue] = fromValue(
+      field.props.value
+    )
+    const [
+      isValidPropsInitialValue,
+      isEmptyPropsInitialValue,
+      propsInitialValue,
+    ] = fromValue(field.props.initialValue)
+    if (isEmptySelfInitialValue) {
+      if (isEmptyPropsInitialValue) {
+        if (!isEqual(selfInitialValue, propsInitialValue)) {
+          field.initialValue = shallowClone(propsInitialValue)
+        }
+      } else if (isValidPropsInitialValue) {
+        field.initialValue = shallowClone(propsInitialValue)
+      }
+    }
+    if (isEmptySelfValue) {
+      if (!isEmptyPropsValue) {
+        field.value = shallowClone(propsValue)
+      } else {
+        if (!isEmptyPropsInitialValue) {
+          field.value = shallowClone(propsInitialValue)
+        } else if (isValidPropsValue) {
+          if (!isEqual(selfValue, propsValue)) {
+            field.value = shallowClone(propsValue)
+          }
+        } else if (isValidPropsInitialValue) {
+          if (!isEqual(selfValue, propsInitialValue)) {
+            field.value = shallowClone(propsInitialValue)
+          }
+        }
+      }
     }
   }
   GlobalState.initializing = false
@@ -514,7 +588,7 @@ export const getModelState = (model: any, getter?: any) => {
 }
 
 export const modelStateSetter = (model: any) => {
-  return action((state?: any) => setModelState(model, state))
+  return batch.bound((state?: any) => setModelState(model, state))
 }
 
 export const modelStateGetter = (model: any) => {
@@ -522,7 +596,7 @@ export const modelStateGetter = (model: any) => {
 }
 
 export const createFieldStateSetter = (form: Form) => {
-  return action((pattern: FieldMatchPattern, payload?: any) => {
+  return batch.bound((pattern: FieldMatchPattern, payload?: any) => {
     if (isQuery(pattern)) {
       pattern.forEach((field) => {
         field.setState(payload)
@@ -603,21 +677,22 @@ export const applyValuesPatch = (
 
 export const triggerFormInitialValuesChange = (
   form: Form,
-  change: Formily.Reactive.Types.DataChange
+  change: DataChange
 ) => {
-  if (change.path[0] === 'initialValues') {
+  const path = change.path
+  if (path[path.length - 1] === 'length') return
+  if (path[0] === 'initialValues') {
     if (change.type === 'add' || change.type === 'set') {
-      applyValuesPatch(form, change.path.slice(1), change.value)
+      applyValuesPatch(form, path.slice(1), change.value)
     }
     form.notify(LifeCycleTypes.ON_FORM_INITIAL_VALUES_CHANGE)
   }
 }
 
-export const triggerFormValuesChange = (
-  form: Form,
-  change: Formily.Reactive.Types.DataChange
-) => {
-  if (change.path[0] === 'values') {
+export const triggerFormValuesChange = (form: Form, change: DataChange) => {
+  const path = change.path
+  if (path[path.length - 1] === 'length') return
+  if (path[0] === 'values') {
     form.notify(LifeCycleTypes.ON_FORM_VALUES_CHANGE)
   }
 }
