@@ -12,8 +12,6 @@ Designable 的核心理念是将设计器搭建变成模块化组合，一切可
 
 ## 安装
 
-> 状态：未发布
-
 Ant Design 用户
 
 ```bash
@@ -207,12 +205,15 @@ interface IDesignableFieldFactoryProps {
   registryName: string //必填项，注册名称，标识DesignableField在组件树中的componentName
   components?: Record<string, React.JSXElementConstructor<unknown>> //自定义画布组件，用于传入x-component/x-decorator
   componentsPropsSchema?: Record<string, ISchema> //自定义画布组件属性schema配置
+  componentsIcon?: Record<string, React.ReactNode> //组件Icon
+  componentsSourceIcon?: Record<string, React.ReactNode> //组件拖拽源Icon
   dropFormItemComponents?: ComponentNameMatcher[] //标识哪些组件不需要支持FormItem
   dropReactionComponents?: ComponentNameMatcher[] //标识哪些组件不需要支持响应器配置
   selfRenderChildrenComponents?: ComponentNameMatcher[] //标识哪些画布组件是由组件自身渲染子树，目前内部ArrayTable/FormTab这类组件是默认标识了
   inlineChildrenLayoutComponents?: ComponentNameMatcher[] //标识哪些画布组件的子组件布局模式是内联模式
   inlineLayoutComponents?: ComponentNameMatcher[] //标识哪些画布组件本身是内联模式
   restrictChildrenComponents?: Record<string, ComponentNameMatcher[]> //节点约束，标识画布组件之间的上下级约束关系，比如A组件的子节点只能是B/C组件
+  restrictSiblingComponents?: Record<string, ComponentNameMatcher[]> //节点约束，标识画布组件相邻约束关系，比如A组件的相邻节点只能是B/C组件
 }
 
 interface createDesignableField {

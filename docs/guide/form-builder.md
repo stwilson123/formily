@@ -12,8 +12,6 @@ The core concept of Designable is to turn the designer into a modular combinatio
 
 ## Install
 
-> Status: Unpublished
-
 Ant Design users
 
 ```bash
@@ -207,12 +205,15 @@ interface IDesignableFieldFactoryProps {
   registryName: string //Required, registered name, componentName that identifies DesignableField in the component tree
   components?: Record<string, React.JSXElementConstructor<unknown>> //Custom canvas components, used to pass in x-component/x-decorator
   componentsPropsSchema?: Record<string, ISchema> //Custom canvas component property schema configuration
+  componentsIcon?: Record<string, React.ReactNode> //Custom canvas component's icon
+  componentsSourceIcon?: Record<string, React.ReactNode> //Custom canvas component's drag source icon
   dropFormItemComponents?: ComponentNameMatcher[] //Identify which components do not need to support FormItem
   dropReactionComponents?: ComponentNameMatcher[] //Identify which components do not need to support responder configuration
   selfRenderChildrenComponents?: ComponentNameMatcher[] //Identify which canvas components are rendered by the component itself, and currently internal components such as ArrayTable/FormTab are identified by default
   inlineChildrenLayoutComponents?: ComponentNameMatcher[] //Identify which canvas component's child component layout mode is inline mode
   inlineLayoutComponents?: ComponentNameMatcher[] //Identify which canvas components are in inline mode
   restrictChildrenComponents?: Record<string, ComponentNameMatcher[]> //Node constraints, identify the upper and lower constraints between canvas components, for example, the child nodes of A component can only be B/C components
+  restrictSiblingComponents?: Record<string, ComponentNameMatcher[]> //Node constraint, identifies the adjacent constraint relationship of canvas components, for example, adjacent nodes of component A can only be B/C components
 }
 
 interface createDesignableField {
