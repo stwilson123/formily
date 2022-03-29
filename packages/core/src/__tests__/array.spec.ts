@@ -1,5 +1,10 @@
 import { createForm } from '../'
-import { onFieldValueChange, onFormValuesChange } from '../effects'
+import {
+  onFieldValueChange,
+  onFormInitialValuesChange,
+  onFormValuesChange,
+} from '../effects'
+import { DataField } from '../types'
 import { attach } from './shared'
 
 test('create array field', () => {
@@ -138,6 +143,61 @@ test('array field children state exchanges', () => {
   expect(form.query('array.0.value').get('value')).toEqual(33)
   expect(form.query('array.1.value').get('value')).toEqual(44)
   expect(form.query('array.2.value').get('value')).toEqual(55)
+})
+
+test('array field move up/down then fields move', () => {
+  const form = attach(createForm())
+  const array = attach(
+    form.createArrayField({
+      name: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'value',
+      basePath: 'array.0',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'value',
+      basePath: 'array.1',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'value',
+      basePath: 'array.2',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'value',
+      basePath: 'array.3',
+    })
+  )
+  const line0 = form.fields['array.0.value']
+  const line1 = form.fields['array.1.value']
+  const line2 = form.fields['array.2.value']
+  const line3 = form.fields['array.3.value']
+
+  array.push({ value: '0' }, { value: '1' }, { value: '2' }, { value: '3' })
+
+  array.move(0, 3)
+
+  // 1,2,3,0
+  expect(form.fields['array.0.value']).toBe(line1)
+  expect(form.fields['array.1.value']).toBe(line2)
+  expect(form.fields['array.2.value']).toBe(line3)
+  expect(form.fields['array.3.value']).toBe(line0)
+
+  array.move(3, 1)
+
+  // 1,0,2,3
+  expect(form.fields['array.0.value']).toBe(line1)
+  expect(form.fields['array.1.value']).toBe(line0)
+  expect(form.fields['array.2.value']).toBe(line2)
+  expect(form.fields['array.3.value']).toBe(line3)
 })
 
 test('void children', () => {
@@ -356,17 +416,20 @@ test('array field move api with children', async () => {
     })
   )
   await array.move(0, 2)
-  expect(form.fields['array.0.name']).not.toBeUndefined()
+  expect(form.fields['array.0.name']).toBeUndefined()
   expect(form.fields['array.2.name']).toBeUndefined()
+  expect(form.fields['array.1.name']).not.toBeUndefined()
 })
 
 test('array field remove memo leak', async () => {
   const handler = jest.fn()
   const valuesChange = jest.fn()
+  const initialValuesChange = jest.fn()
   const form = attach(
     createForm({
       effects() {
         onFormValuesChange(valuesChange)
+        onFormInitialValuesChange(initialValuesChange)
         onFieldValueChange('*', handler)
       },
     })
@@ -391,8 +454,9 @@ test('array field remove memo leak', async () => {
       basePath: 'array',
     })
   )
-  expect(handler).toBeCalledTimes(1)
+  expect(handler).toBeCalledTimes(0)
   expect(valuesChange).toBeCalledTimes(4)
+  expect(initialValuesChange).toBeCalledTimes(0)
 })
 
 test('nest array remove', async () => {
@@ -432,14 +496,14 @@ test('nest array remove', async () => {
     })
   )
 
-  attach(
+  const obj00 = attach(
     form.createObjectField({
       name: '0',
       basePath: 'metrics.0.content',
     })
   )
 
-  attach(
+  const obj10 = attach(
     form.createObjectField({
       name: '0',
       basePath: 'metrics.1.content',
@@ -461,9 +525,182 @@ test('nest array remove', async () => {
       initialValue: '123',
     })
   )
-
+  expect(obj00.indexes[0]).toBe(0)
+  expect(obj00.index).toBe(0)
+  expect(obj10.index).toBe(0)
+  expect(obj10.indexes[0]).toBe(1)
   await (form.query('metrics.1.content').take() as any).remove(0)
   expect(form.fields['metrics.0.content.0.attr']).not.toBeUndefined()
   await metrics.remove(1)
   expect(form.fields['metrics.0.content.0.attr']).not.toBeUndefined()
+  expect(form.initialValues.metrics?.[1]?.content?.[0]?.attr).toBeUndefined()
+})
+
+test('incomplete insertion of array elements', async () => {
+  const form = attach(
+    createForm({
+      values: {
+        array: [{ aa: 1 }, { aa: 2 }, { aa: 3 }],
+      },
+    })
+  )
+  const array = attach(
+    form.createArrayField({
+      name: 'array',
+    })
+  )
+  attach(
+    form.createObjectField({
+      name: '0',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'aa',
+      basePath: 'array.0',
+    })
+  )
+  attach(
+    form.createObjectField({
+      name: '2',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'aa',
+      basePath: 'array.2',
+    })
+  )
+  expect(form.fields['array.0.aa']).not.toBeUndefined()
+  expect(form.fields['array.1.aa']).toBeUndefined()
+  expect(form.fields['array.2.aa']).not.toBeUndefined()
+  await array.unshift({})
+  expect(form.fields['array.0.aa']).toBeUndefined()
+  expect(form.fields['array.1.aa']).not.toBeUndefined()
+  expect(form.fields['array.2.aa']).toBeUndefined()
+  expect(form.fields['array.3.aa']).not.toBeUndefined()
+})
+
+test('void array items need skip data', () => {
+  const form = attach(createForm())
+  const array = attach(
+    form.createArrayField({
+      name: 'array',
+    })
+  )
+  const array2 = attach(
+    form.createArrayField({
+      name: 'array2',
+    })
+  )
+  attach(
+    form.createVoidField({
+      name: '0',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createVoidField({
+      name: '0',
+      basePath: 'array2',
+    })
+  )
+  attach(
+    form.createVoidField({
+      name: 'space',
+      basePath: 'array.0',
+    })
+  )
+  const select = attach(
+    form.createField({
+      name: 'select',
+      basePath: 'array.0.space',
+    })
+  )
+  const select2 = attach(
+    form.createField({
+      name: 'select2',
+      basePath: 'array2.0',
+    })
+  )
+
+  select.value = 123
+  select2.value = 123
+  expect(array.value).toEqual([123])
+  expect(array2.value).toEqual([123])
+})
+
+test('array field reset', () => {
+  const form = attach(createForm())
+  const array = attach(
+    form.createArrayField({
+      name: 'array',
+    })
+  )
+  attach(
+    form.createObjectField({
+      name: '0',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'input',
+      initialValue: '123',
+      basePath: 'array.0',
+    })
+  )
+  form.reset('*', { forceClear: true })
+  expect(form.values).toEqual({ array: [] })
+  expect(array.value).toEqual([])
+})
+
+test('array field remove can not memory leak', async () => {
+  const handler = jest.fn()
+  const form = attach(
+    createForm({
+      values: {
+        array: [{ aa: 1 }, { aa: 2 }],
+      },
+      effects() {
+        onFieldValueChange('array.*.aa', handler)
+      },
+    })
+  )
+  const array = attach(
+    form.createArrayField({
+      name: 'array',
+    })
+  )
+  attach(
+    form.createObjectField({
+      name: '0',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'aa',
+      basePath: 'array.0',
+    })
+  )
+  attach(
+    form.createObjectField({
+      name: '1',
+      basePath: 'array',
+    })
+  )
+  attach(
+    form.createField({
+      name: 'aa',
+      basePath: 'array.1',
+    })
+  )
+  await array.remove(0)
+  form.query('array.0.aa').take((field) => {
+    ;(field as DataField).value = '123'
+  })
+  expect(handler).toBeCalledTimes(2)
 })

@@ -8,6 +8,8 @@ import {
   toArr,
   isBool,
   isNum,
+  isEqual,
+  each,
 } from '@formily/shared'
 import { getValidateFormats } from './registry'
 import { IRegistryRules } from './types'
@@ -31,12 +33,26 @@ const isValidateEmpty = (value: any) => {
 const getLength = (value: any) =>
   isStr(value) ? stringLength(value) : value ? value.length : 0
 
+const extendSameRules = (
+  rules: IRegistryRules,
+  names: Record<string, string>
+) => {
+  each(names, (realName, name) => {
+    rules[name] = (value, rule, ...args) =>
+      rules[realName](value, { ...rule, [realName]: rule[name] }, ...args)
+  })
+}
+
 const RULES: IRegistryRules = {
   format(value, rule) {
     if (isValidateEmpty(value)) return ''
-    return !new RegExp(getValidateFormats(rule.format) || '').test(value)
-      ? rule.message
-      : ''
+    if (rule.format) {
+      const format = getValidateFormats(rule.format)
+      if (format) {
+        return !new RegExp(format).test(value) ? rule.message : ''
+      }
+    }
+    return ''
   },
   required(value, rule) {
     if (rule.required === false) return ''
@@ -48,23 +64,17 @@ const RULES: IRegistryRules = {
     const max = Number(rule.max)
     return length > max ? rule.message : ''
   },
-  maximum(value, rule) {
+  min(value, rule) {
     if (isValidateEmpty(value)) return ''
     const length = isNum(value) ? value : getLength(value)
-    const max = Number(rule.maximum)
-    return length > max ? rule.message : ''
+    const min = Number(rule.min)
+    return length < min ? rule.message : ''
   },
   exclusiveMaximum(value, rule) {
     if (isValidateEmpty(value)) return ''
     const length = isNum(value) ? value : getLength(value)
     const max = Number(rule.exclusiveMaximum)
     return length >= max ? rule.message : ''
-  },
-  minimum(value, rule) {
-    if (isValidateEmpty(value)) return ''
-    const length = isNum(value) ? value : getLength(value)
-    const min = Number(rule.minimum)
-    return length < min ? rule.message : ''
   },
   exclusiveMinimum(value, rule) {
     if (isValidateEmpty(value)) return ''
@@ -78,12 +88,7 @@ const RULES: IRegistryRules = {
     const len = Number(rule.len)
     return length !== len ? rule.message : ''
   },
-  min(value, rule) {
-    if (isValidateEmpty(value)) return ''
-    const length = isNum(value) ? value : getLength(value)
-    const min = Number(rule.min)
-    return length < min ? rule.message : ''
-  },
+
   pattern(value, rule) {
     if (isValidateEmpty(value)) return ''
     return !new RegExp(rule.pattern).test(value) ? rule.message : ''
@@ -113,6 +118,49 @@ const RULES: IRegistryRules = {
     const enums = toArr(rule.enum)
     return enums.indexOf(value) === -1 ? rule.message : ''
   },
+  const(value, rule) {
+    if (isValidateEmpty(value)) return ''
+    return rule.const !== value ? rule.message : ''
+  },
+  multipleOf(value, rule) {
+    if (isValidateEmpty(value)) return ''
+    return Number(value) % Number(rule.multipleOf) !== 0 ? rule.message : ''
+  },
+  uniqueItems(value, rule) {
+    if (isValidateEmpty(value)) return ''
+    value = toArr(value)
+    return value.some((item: any, index: number) => {
+      for (let i = 0; i < value.length; i++) {
+        if (i !== index && !isEqual(value[i], item)) {
+          return false
+        }
+      }
+      return true
+    })
+      ? ''
+      : rule.message
+  },
+  maxProperties(value, rule) {
+    if (isValidateEmpty(value)) return ''
+    return Object.keys(value || {}).length <= Number(rule.maxProperties)
+      ? ''
+      : rule.message
+  },
+  minProperties(value, rule) {
+    if (isValidateEmpty(value)) return ''
+    return Object.keys(value || {}).length >= Number(rule.minProperties)
+      ? ''
+      : rule.message
+  },
 }
+
+extendSameRules(RULES, {
+  maximum: 'max',
+  minimum: 'min',
+  maxItems: 'max',
+  minItems: 'min',
+  maxLength: 'max',
+  minLength: 'min',
+})
 
 export default RULES

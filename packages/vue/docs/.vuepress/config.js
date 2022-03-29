@@ -30,7 +30,7 @@ module.exports = {
       },
       {
         text: '主站',
-        link: 'https://v2.formilyjs.org',
+        link: 'https://formilyjs.org',
       },
       {
         text: 'GITHUB',
@@ -53,6 +53,7 @@ module.exports = {
             '/api/components/recursion-field-with-component',
             '/api/components/form-provider',
             '/api/components/form-consumer',
+            '/api/components/expression-scope',
           ],
         },
         {
@@ -62,6 +63,7 @@ module.exports = {
             '/api/hooks/use-field-schema',
             '/api/hooks/use-form',
             '/api/hooks/use-form-effects',
+            '/api/hooks/use-parent-form',
           ],
         },
         {

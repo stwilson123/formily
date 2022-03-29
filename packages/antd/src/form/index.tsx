@@ -1,10 +1,15 @@
 import React from 'react'
-import { Form as FormType, IFormFeedback } from '@formily/core'
-import { FormProvider, IProviderProps, JSXComponent } from '@formily/react'
+import { Form as FormType, ObjectField, IFormFeedback } from '@formily/core'
+import {
+  useParentForm,
+  FormProvider,
+  ExpressionScope,
+  JSXComponent,
+} from '@formily/react'
 import { FormLayout, IFormLayoutProps } from '../form-layout'
 import { PreviewText } from '../preview-text'
-export interface FormProps extends IProviderProps, IFormLayoutProps {
-  form: FormType
+export interface FormProps extends IFormLayoutProps {
+  form?: FormType
   component?: JSXComponent
   onAutoSubmit?: (values: any) => any
   onAutoSubmitFailed?: (feedbacks: IFormFeedback[]) => void
@@ -19,8 +24,9 @@ export const Form: React.FC<FormProps> = ({
   previewTextPlaceholder,
   ...props
 }) => {
-  return (
-    <FormProvider form={form}>
+  const top = useParentForm()
+  const renderContent = (form: FormType | ObjectField) => (
+    <ExpressionScope value={{ $$form: form }}>
       <PreviewText.Placeholder value={previewTextPlaceholder}>
         <FormLayout {...props}>
           {React.createElement(
@@ -36,8 +42,12 @@ export const Form: React.FC<FormProps> = ({
           )}
         </FormLayout>
       </PreviewText.Placeholder>
-    </FormProvider>
+    </ExpressionScope>
   )
+  if (form)
+    return <FormProvider form={form}>{renderContent(form)}</FormProvider>
+  if (!top) throw new Error('must pass form instance by createForm')
+  return renderContent(top)
 }
 
 Form.defaultProps = {

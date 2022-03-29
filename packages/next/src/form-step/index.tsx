@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { model } from '@formily/reactive'
+import { define, observable, model, markRaw, action } from '@formily/reactive'
 import cls from 'classnames'
 import {
   StepProps as StepsProps,
@@ -64,13 +64,20 @@ const parseSteps = (schema: Schema) => {
 }
 
 const createFormStep = (defaultCurrent = 0): IFormStep => {
-  const env: FormStepEnv = {
-    form: null,
-    field: null,
-    steps: [],
-  }
+  const env: FormStepEnv = define(
+    {
+      form: null,
+      field: null,
+      steps: [],
+    },
+    {
+      form: observable.ref,
+      field: observable.ref,
+      steps: observable.shallow,
+    }
+  )
 
-  const setDisplay = (target: number) => {
+  const setDisplay = action.bound((target: number) => {
     const currentStep = env.steps[target]
     env.steps.forEach(({ name }) => {
       env.form.query(`${env.field.address}.${name}`).take((field) => {
@@ -81,7 +88,7 @@ const createFormStep = (defaultCurrent = 0): IFormStep => {
         }
       })
     })
-  }
+  })
 
   const next = () => {
     if (formStep.allowNext) {
@@ -126,7 +133,7 @@ const createFormStep = (defaultCurrent = 0): IFormStep => {
       return env.form?.submit?.(onSubmit)
     },
   })
-  return formStep
+  return markRaw(formStep)
 }
 
 export const FormStep: ComposedFormTab = connect(
